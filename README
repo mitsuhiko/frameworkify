@@ -1,0 +1,53 @@
+
+
+    - Frameworkify
+
+    What is this and why should I care?
+
+      Ever used cmake to create an OS X application and you're linking
+      against some library that is not installed globally?  Chances are
+      you have stumbled upon an error like this:
+
+        dyld: Library not loaded: /usr/local/lib/libSDL-1.3.0.dylib
+          Referenced from: ./PixelDefense.app/Contents/MacOS/PixelDefense
+            Reason: image not found
+        Trace/BPT trap
+
+      In short: this script fixes it.  How does it do that and why does
+      this happen?  It happens because apparently on OS X the .dylib
+      file provides at compilation time the path where that library
+      will be found later.  However very often you want to ship that
+      library in the bundle (in the Frameworks) folder instead of putting
+      it at the location the library wants to reside normally.
+
+      This script rewrites your application after compilation to look
+      for libraries elsewhere (namely in the Frameworks) folder.
+      Furthermore it will copy your library into the Frameworks folder so
+      you don't have to.
+
+    How do I use it?
+
+      $ frameworkify.py YourApp.app/Contents/MacOS/YourApp
+        /path/to/your/library-1.0.dylib
+
+      This will then rewrite the path in YourApp and copy the library
+      into the Frameworks folder.  For more options see --help.
+
+    How do I use it with CMake?
+
+      This is from my setup:
+
+        set(BUNDLE_BINARY
+           ${CMAKE_CURRENT_BINARY_DIR}/YourApp.app/Contents/MacOS/YourApp)
+        add_custom_command(TARGET YourApp POST_BUILD
+          COMMAND python scripts/frameworkify.py
+          ${BUNDLE_BINARY} ${SDL_LIBRARY} ${GLEW_LIBRARY}
+        )
+
+      Where SDL_LIBRARY was found this way:
+
+        find_library(SDL_LIBRARY
+          NAMES SDL-1.3.0
+          PATHS ${SDL_PATH}/lib
+          NO_DEFAULT_PATH
+        )
