@@ -20,6 +20,7 @@ r"""
     :license: BSD, see LICENSE for more details.
 """
 import os
+import sys
 from optparse import OptionParser
 
 
@@ -110,6 +111,7 @@ def main():
         frameworkify(args[0], args[1:], opts.nocopy, opts.path)
     except Exception, e:
         parser.error(str(e))
+        sys.exit(1)
 
 
 if __name__ == '__main__':
